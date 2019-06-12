@@ -1,44 +1,58 @@
 import React, { Component } from "react";
+import Restaurant from "./restaurant";
+import Filter from "./filter";
 
 class Liste extends Component {
-  state = {};
+  filterGeoloc() {
+    const { restaurants, bounds } = this.props;
+    const latMax = bounds.na.l;
+    const latMin = bounds.na.j;
+    const longMax = bounds.ga.l;
+    const longMin = bounds.ga.j;
+    const filtered = restaurants.filter(
+      resto =>
+        resto.long < longMax &&
+        resto.long > longMin &&
+        resto.lat < latMax &&
+        resto.lat > latMin
+    );
+    return filtered;
+  }
   render() {
+    const restaurants =
+      Object.keys(this.props.bounds).length > 0
+        ? this.filterGeoloc()
+        : this.props.restaurants;
+    console.log(restaurants);
+
     return (
-      <div style={{ width: "25%", textAlign: "left" }}>
-        <h5 style={{ color: "ghostwhite", textAlign: "center", marginTop: 10 }}>
-          Liste de restaurant
-        </h5>
-        <p style={{ color: "ghostwhite", marginLeft: 10, marginBottom: 5 }}>
-          Filtrer selon les notes :
-        </p>
-        <div className="container">
-          <div className="row mb-1">
-            <div className="col-12">
-              <select className="form-control form-control-sm" id="sel1">
-                <option value="1">Note minimum : 1</option>
-                <option value="2">Note minimum : 2</option>
-                <option value="3">Note minimum : 3</option>
-                <option value="4">Note minimum : 4</option>
-                <option value="5">Note minimum : 5</option>
-              </select>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-12">
-              <select className="form-control form-control-sm" id="sel2">
-                <option value="1">Note maximum : 1</option>
-                <option value="2">Note maximum : 2</option>
-                <option value="3">Note maximum : 3</option>
-                <option value="4">Note maximum : 4</option>
-                <option value="5">Note maximum : 5</option>
-              </select>
-            </div>
-          </div>
+      <div style={styles.div}>
+        <h5 style={styles.h5}>Liste de restaurant</h5>
+        <p style={styles.p}>Filtrer selon les notes :</p>
+        <Filter />
+        <hr style={styles.hr} />
+        <div id="liste" style={styles.restaurant}>
+          {restaurants.map((resto, index) => (
+            <Restaurant
+              key={index}
+              resto={resto}
+              index={index}
+              map={this.props.map}
+              markers={this.props.markers}
+            />
+          ))}
         </div>
-        <hr style={{ backgroundColor: "ghostwhite", marginLeft: 6 }} />
       </div>
     );
   }
 }
+
+const styles = {
+  div: { width: "25%", textAlign: "left" },
+  h5: { color: "ghostwhite", textAlign: "center", marginTop: 10 },
+  p: { color: "ghostwhite", marginLeft: 10, marginBottom: 5 },
+  hr: { backgroundColor: "ghostwhite", marginLeft: 6 },
+  restaurant: { color: "ghostwhite", marginLeft: 8 }
+};
 
 export default Liste;
