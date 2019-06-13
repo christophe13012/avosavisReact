@@ -3,7 +3,13 @@ import Liste from "./liste";
 import restaurants from "../listeResto.json";
 
 class Container extends Component {
-  state = { map: {}, restaurants: [], markers: [], bounds: {} };
+  state = {
+    map: {},
+    restaurants: [],
+    markers: [],
+    bounds: {},
+    showDescription: false
+  };
   componentDidMount() {
     const map = new window.google.maps.Map(this.refs.map, {
       center: { lat: 41.0082, lng: 28.9784 },
@@ -44,6 +50,7 @@ class Container extends Component {
     restaurants.forEach(resto => {
       resto.placeId = 0;
       this.placerMarker(resto, map);
+      resto.marker = this.state.markers[this.state.markers.length - 1];
     });
     this.setState({ restaurants, map });
   }
@@ -58,8 +65,8 @@ class Container extends Component {
   }
   placerMarker = (resto, map) => {
     let { markers } = this.state;
-    var imageResto = "icons/resto.png";
-    var markerResto = new window.google.maps.Marker({
+    const imageResto = "icons/resto.png";
+    const markerResto = new window.google.maps.Marker({
       position: new window.google.maps.LatLng(resto.lat, resto.long),
       map: map,
       icon: imageResto,
@@ -80,6 +87,13 @@ class Container extends Component {
     });
     this.setState({ markers });
   };
+  handleClose() {
+    this.setState({ showDescription: false });
+  }
+
+  handleShow() {
+    this.setState({ showDescription: true });
+  }
   render() {
     const { restaurants, map, markers, bounds } = this.state;
     return (
@@ -94,6 +108,7 @@ class Container extends Component {
           map={map}
           markers={markers}
           bounds={bounds}
+          showDescription={this.handleShow}
         />
       </div>
     );

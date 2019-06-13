@@ -18,13 +18,15 @@ class Liste extends Component {
     );
     return filtered;
   }
+  handleClick = marker => {
+    this.props.map.setCenter(marker.getPosition());
+    this.props.map.setZoom(16);
+  };
   render() {
     const restaurants =
       Object.keys(this.props.bounds).length > 0
         ? this.filterGeoloc()
         : this.props.restaurants;
-    console.log(restaurants);
-
     return (
       <div style={styles.div}>
         <h5 style={styles.h5}>Liste de restaurant</h5>
@@ -33,13 +35,7 @@ class Liste extends Component {
         <hr style={styles.hr} />
         <div id="liste" style={styles.restaurant}>
           {restaurants.map((resto, index) => (
-            <Restaurant
-              key={index}
-              resto={resto}
-              index={index}
-              map={this.props.map}
-              markers={this.props.markers}
-            />
+            <Restaurant key={index} resto={resto} onClick={this.handleClick} />
           ))}
         </div>
       </div>
