@@ -145,7 +145,7 @@ const styles = {
     display: "flex",
     flexDirection: "row",
     padding: 5,
-    height: 750
+    height: 600
   },
   divMap: { width: "75%", backgroundColor: "white", borderRadius: 5 },
   mapStyle: {

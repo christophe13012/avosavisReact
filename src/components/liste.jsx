@@ -46,7 +46,7 @@ class Liste extends Component {
           max={this.state.max}
         />
         <hr style={styles.hr} />
-        <div id="liste" style={styles.restaurant}>
+        <div style={styles.restaurants}>
           {filteredRestaurants.map((restaurant, index) => (
             <Restaurant
               key={index}
@@ -65,7 +65,12 @@ const styles = {
   h5: { color: "ghostwhite", textAlign: "center", marginTop: 10 },
   p: { color: "ghostwhite", marginLeft: 10, marginBottom: 5 },
   hr: { backgroundColor: "ghostwhite", marginLeft: 6, marginTop: 5 },
-  restaurant: { color: "ghostwhite", marginLeft: 8 }
+  restaurants: {
+    color: "ghostwhite",
+    marginLeft: 8,
+    overflow: "auto",
+    height: 450
+  }
 };
 
 export default Liste;
