@@ -1,32 +1,26 @@
 import React, { Component } from "react";
+import { dessinNote } from "./../utils";
+import Select from "./select";
 
 class Filter extends Component {
-  state = {};
+  options = [1, 2, 3, 4, 5];
   render() {
+    const { min, max, onChangeMin, onChangeMax } = this.props;
     return (
-      <div className="container">
-        <div className="row mb-1">
-          <div className="col-12">
-            <select className="form-control form-control-sm" id="sel1">
-              <option value="1">Note minimum : 1</option>
-              <option value="2">Note minimum : 2</option>
-              <option value="3">Note minimum : 3</option>
-              <option value="4">Note minimum : 4</option>
-              <option value="5">Note minimum : 5</option>
-            </select>
+      <div className="container" style={{ marginBottom: 10 }}>
+        De
+        <Select options={this.options} value={min} onChange={onChangeMin} />
+        à
+        <Select options={this.options} value={max} onChange={onChangeMax} />
+        <span style={{ marginLeft: 3 }}>{dessinNote(1)}</span>
+        {min > max && (
+          <div
+            style={{ padding: 3, textAlign: "center" }}
+            className="alert alert-danger"
+          >
+            <strong>Filtre invalide</strong>
           </div>
-        </div>
-        <div className="row">
-          <div className="col-12">
-            <select className="form-control form-control-sm" id="sel2">
-              <option value="1">Note maximum : 1</option>
-              <option value="2">Note maximum : 2</option>
-              <option value="3">Note maximum : 3</option>
-              <option value="4">Note maximum : 4</option>
-              <option value="5">Note maximum : 5</option>
-            </select>
-          </div>
-        </div>
+        )}
       </div>
     );
   }

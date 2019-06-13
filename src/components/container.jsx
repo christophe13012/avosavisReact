@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import Liste from "./liste";
 import restaurants from "../listeResto.json";
+import DescriptionModal from "./descriptionModal";
 
 class Container extends Component {
   state = {
     map: {},
     restaurants: [],
+    restaurant: {},
     markers: [],
     bounds: {},
     showDescription: false
@@ -50,6 +52,7 @@ class Container extends Component {
     restaurants.forEach(resto => {
       resto.placeId = 0;
       this.placerMarker(resto, map);
+      resto.moyenneNote = this.moyenneNote(resto);
       resto.marker = this.state.markers[this.state.markers.length - 1];
     });
     this.setState({ restaurants, map });
@@ -62,6 +65,16 @@ class Container extends Component {
         : "Error: Your browser doesn't support geolocation."
     );
     infoWindow.open(map);
+  }
+  moyenneNote(resto) {
+    let totalNotes = 0;
+    const nombreNotes = resto.ratings.length;
+    for (let i = 0; i < nombreNotes; i++) {
+      totalNotes += Number(resto.ratings[i].stars);
+    }
+    // On arrondi la moyenne au 0.25 pres
+    const moyStars = Math.round(2 * (totalNotes / nombreNotes)) / 2;
+    return moyStars;
   }
   placerMarker = (resto, map) => {
     let { markers } = this.state;
@@ -87,15 +100,21 @@ class Container extends Component {
     });
     this.setState({ markers });
   };
-  handleClose() {
+  handleClose = () => {
     this.setState({ showDescription: false });
-  }
+  };
 
   handleShow() {
     this.setState({ showDescription: true });
   }
+  handleClick = restaurant => {
+    this.setState({ restaurant });
+    this.state.map.setCenter(restaurant.marker.getPosition());
+    this.state.map.setZoom(16);
+    this.handleShow();
+  };
   render() {
-    const { restaurants, map, markers, bounds } = this.state;
+    const { restaurants, restaurant, bounds, showDescription } = this.state;
     return (
       <div style={styles.containerStyle}>
         <div style={styles.divMap}>
@@ -105,10 +124,14 @@ class Container extends Component {
         </div>
         <Liste
           restaurants={restaurants}
-          map={map}
-          markers={markers}
           bounds={bounds}
           showDescription={this.handleShow}
+          onClick={this.handleClick}
+        />
+        <DescriptionModal
+          show={showDescription}
+          onHide={this.handleClose}
+          restaurant={restaurant}
         />
       </div>
     );
