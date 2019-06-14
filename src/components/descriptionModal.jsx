@@ -3,7 +3,7 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { dessinNote } from "./../utils";
 
-const DescriptionModal = ({ restaurant, show, onHide }) => {
+const DescriptionModal = ({ restaurant, show, onHide, onOpenRating }) => {
   return (
     <Modal show={show} onHide={onHide}>
       <Modal.Header closeButton>
@@ -21,24 +21,25 @@ const DescriptionModal = ({ restaurant, show, onHide }) => {
             },${restaurant.long}&heading=151.78&pitch=-0.76&key=key`}
           />
           <p style={styles.noteMoyenne}>
-            Note Moyenne : {dessinNote(restaurant.moyenneNote)}
+            Note Moyenne : {dessinNote(restaurant.averageStars)}
           </p>
           <div>
             <p style={styles.avis}>Voici les derniers avis postés :</p>
             {Object.keys(restaurant).length > 0 &&
               restaurant.ratings.map((rating, index) => (
                 <React.Fragment key={index}>
-                  <p style={styles.note}>
-                    {dessinNote(restaurant.moyenneNote)}
-                  </p>
+                  <p style={styles.note}>{dessinNote(rating.stars)}</p>
                   <p style={styles.comment}>{rating.comment}</p>
+                  {index !== restaurant.ratings.length - 1 && (
+                    <hr style={styles.hr} />
+                  )}
                 </React.Fragment>
               ))}
           </div>
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="success" onClick={onHide}>
+        <Button variant="success" onClick={() => onOpenRating(restaurant)}>
           Ajouter un avis
         </Button>
         <Button variant="danger" onClick={onHide}>
@@ -53,7 +54,8 @@ const styles = {
   noteMoyenne: { marginTop: 10, marginBottom: 10 },
   note: { marginBottom: 3 },
   avis: { marginBottom: 5 },
-  comment: { marginBottom: 3 }
+  comment: { marginBottom: 3 },
+  hr: { marginTop: 5, marginBottom: 5 }
 };
 
 export default DescriptionModal;

@@ -3,7 +3,7 @@ import Restaurant from "./restaurant";
 import Filter from "./filter";
 
 class Liste extends Component {
-  state = { min: 1, max: 5 };
+  state = { range: { min: 1, max: 5 } };
   filterGeoloc() {
     const { restaurants, bounds } = this.props;
     const latMax = bounds.na.l;
@@ -11,19 +11,18 @@ class Liste extends Component {
     const longMax = bounds.ga.l;
     const longMin = bounds.ga.j;
     const geolocRestaurants = restaurants.filter(
-      resto =>
-        resto.long < longMax &&
-        resto.long > longMin &&
-        resto.lat < latMax &&
-        resto.lat > latMin
+      restaurant =>
+        restaurant.long < longMax &&
+        restaurant.long > longMin &&
+        restaurant.lat < latMax &&
+        restaurant.lat > latMin
     );
     return geolocRestaurants;
   }
-  handleChangeMin = e => {
-    this.setState({ min: e.target.value });
-  };
-  handleChangeMax = e => {
-    this.setState({ max: e.target.value });
+  handleChange = e => {
+    const range = { ...this.state.range };
+    range[e.target.name] = e.target.value;
+    this.setState({ range });
   };
   render() {
     const geolocRestaurants =
@@ -31,19 +30,18 @@ class Liste extends Component {
         ? this.filterGeoloc()
         : this.props.restaurants;
     const filteredRestaurants = geolocRestaurants.filter(
-      resto =>
-        resto.moyenneNote >= this.state.min &&
-        resto.moyenneNote <= this.state.max
+      restaurant =>
+        restaurant.averageStars >= this.state.range.min &&
+        restaurant.averageStars <= this.state.range.max
     );
     return (
       <div style={styles.div}>
         <h5 style={styles.h5}>Liste de restaurant</h5>
         <p style={styles.p}>Filtrer selon les notes :</p>
         <Filter
-          onChangeMin={this.handleChangeMin}
-          onChangeMax={this.handleChangeMax}
-          min={this.state.min}
-          max={this.state.max}
+          onChange={this.handleChange}
+          min={this.state.range.min}
+          max={this.state.range.max}
         />
         <hr style={styles.hr} />
         <div style={styles.restaurants}>
@@ -52,6 +50,7 @@ class Liste extends Component {
               key={index}
               restaurant={restaurant}
               onClick={this.props.onClick}
+              onOpenRating={this.props.onOpenRating}
             />
           ))}
         </div>

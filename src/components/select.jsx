@@ -8,7 +8,7 @@ const Select = ({ label, name, options, value, onChange }) => {
         value={value}
         onChange={onChange}
         className="form-control-sm"
-        id={name}
+        name={name}
       >
         {options.map((option, index) => (
           <option value={option} key={index}>

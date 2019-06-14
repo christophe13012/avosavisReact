@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Liste from "./liste";
 import restaurants from "../listeResto.json";
 import DescriptionModal from "./descriptionModal";
+import AvisModal from "./avisModal";
 
 class Container extends Component {
   state = {
@@ -10,7 +11,9 @@ class Container extends Component {
     restaurant: {},
     markers: [],
     bounds: {},
-    showDescription: false
+    showDescription: false,
+    showAvis: false,
+    rating: { stars: 0, comment: "" }
   };
   componentDidMount() {
     const map = new window.google.maps.Map(this.refs.map, {
@@ -48,12 +51,12 @@ class Container extends Component {
       // Browser doesn't support Geolocation
       this.handleLocationError(false, infoWindow, map.getCenter(), map);
     }
-    // Ajout resto initiaux
-    restaurants.forEach(resto => {
-      resto.placeId = 0;
-      this.placerMarker(resto, map);
-      resto.moyenneNote = this.moyenneNote(resto);
-      resto.marker = this.state.markers[this.state.markers.length - 1];
+    // Ajout restaurants initiaux
+    restaurants.forEach(restaurant => {
+      restaurant.placeId = 0;
+      this.placerMarker(restaurant, map);
+      restaurant.averageStars = this.averageStars(restaurant);
+      restaurant.marker = this.state.markers[this.state.markers.length - 1];
     });
     this.setState({ restaurants, map });
   }
@@ -66,24 +69,24 @@ class Container extends Component {
     );
     infoWindow.open(map);
   }
-  moyenneNote(resto) {
+  averageStars(restaurant) {
     let totalNotes = 0;
-    const nombreNotes = resto.ratings.length;
+    const nombreNotes = restaurant.ratings.length;
     for (let i = 0; i < nombreNotes; i++) {
-      totalNotes += Number(resto.ratings[i].stars);
+      totalNotes += Number(restaurant.ratings[i].stars);
     }
     // On arrondi la moyenne au 0.25 pres
     const moyStars = Math.round(2 * (totalNotes / nombreNotes)) / 2;
     return moyStars;
   }
-  placerMarker = (resto, map) => {
+  placerMarker = (restaurant, map) => {
     let { markers } = this.state;
     const imageResto = "icons/resto.png";
     const markerResto = new window.google.maps.Marker({
-      position: new window.google.maps.LatLng(resto.lat, resto.long),
+      position: new window.google.maps.LatLng(restaurant.lat, restaurant.long),
       map: map,
       icon: imageResto,
-      title: resto.restaurantName
+      title: restaurant.restaurantName
     });
     markers.push(markerResto);
     markerResto.addListener("click", function() {
@@ -100,21 +103,53 @@ class Container extends Component {
     });
     this.setState({ markers });
   };
-  handleClose = () => {
-    this.setState({ showDescription: false });
+  handleHideModals = () => {
+    this.setState({ showDescription: false, showAvis: false });
   };
-
-  handleShow() {
-    this.setState({ showDescription: true });
-  }
   handleClick = restaurant => {
-    this.setState({ restaurant });
+    this.setState({ showDescription: true, restaurant });
     this.state.map.setCenter(restaurant.marker.getPosition());
     this.state.map.setZoom(16);
-    this.handleShow();
+  };
+  handleOpenRating = restaurant => {
+    const rating = { stars: 0, comment: "" };
+    this.setState({
+      showAvis: true,
+      restaurant,
+      rating,
+      showDescription: false
+    });
+  };
+  handleStarClick = noteSaisie => {
+    const { rating } = this.state;
+    rating.stars = noteSaisie === rating.stars ? rating.stars - 1 : noteSaisie;
+    this.setState({ rating });
+  };
+  handleChangeComment = e => {
+    const { rating } = this.state;
+    rating.comment = e.target.value;
+    this.setState({ rating });
+  };
+  handleRating = () => {
+    const { rating, restaurant, restaurants } = this.state;
+    rating.comment =
+      rating.comment.charAt(0).toUpperCase() + rating.comment.slice(1);
+    const index = restaurants.indexOf(restaurant);
+    restaurant.ratings = [rating, ...restaurant.ratings];
+    restaurant.averageStars = this.averageStars(restaurant);
+    restaurants[index] = restaurant;
+    this.handleHideModals();
+    this.setState({ rating, restaurants });
   };
   render() {
-    const { restaurants, restaurant, bounds, showDescription } = this.state;
+    const {
+      restaurants,
+      restaurant,
+      bounds,
+      showDescription,
+      showAvis,
+      rating
+    } = this.state;
     return (
       <div style={styles.containerStyle}>
         <div style={styles.divMap}>
@@ -125,13 +160,23 @@ class Container extends Component {
         <Liste
           restaurants={restaurants}
           bounds={bounds}
-          showDescription={this.handleShow}
           onClick={this.handleClick}
+          onOpenRating={this.handleOpenRating}
         />
         <DescriptionModal
           show={showDescription}
-          onHide={this.handleClose}
+          onHide={this.handleHideModals}
           restaurant={restaurant}
+          onOpenRating={this.handleOpenRating}
+        />
+        <AvisModal
+          show={showAvis}
+          onHide={this.handleHideModals}
+          restaurant={restaurant}
+          onStarClick={this.handleStarClick}
+          rating={rating}
+          onRate={this.handleRating}
+          onChange={this.handleChangeComment}
         />
       </div>
     );
@@ -140,12 +185,13 @@ class Container extends Component {
 const styles = {
   containerStyle: {
     backgroundColor: "#ef6c00",
-    margin: 20,
+    margin: "auto",
     borderRadius: 5,
     display: "flex",
     flexDirection: "row",
     padding: 5,
-    height: 600
+    height: 600,
+    maxWidth: 1050
   },
   divMap: { width: "75%", backgroundColor: "white", borderRadius: 5 },
   mapStyle: {
