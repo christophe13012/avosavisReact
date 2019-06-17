@@ -1,6 +1,5 @@
 import React from "react";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
+import { Button, Modal } from "react-bootstrap/";
 import { dessinNote } from "./../utils";
 import NoteStars from "./noteStars";
 
@@ -25,7 +24,10 @@ const AvisModal = ({
         <div>
           <p>Adresse : {restaurant.address}</p>
           <p style={styles.noteMoyenne}>
-            Note Moyenne actuelle : {dessinNote(restaurant.averageStars)}
+            Note Moyenne actuelle :{" "}
+            {!restaurant.averageStars
+              ? "Aucune note"
+              : dessinNote(restaurant.averageStars)}
           </p>
           <label>Entrez votre avis et votre note :</label>
           <textarea

@@ -1,6 +1,5 @@
 import React from "react";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
+import { Button, Modal } from "react-bootstrap/";
 import { dessinNote } from "./../utils";
 
 const DescriptionModal = ({ restaurant, show, onHide, onOpenRating }) => {
@@ -23,11 +22,14 @@ const DescriptionModal = ({ restaurant, show, onHide, onOpenRating }) => {
             }&heading=151.78&pitch=-0.76&key=AIzaSyBf4GOhxsge_3kuAKHKDDiWLVEbl6t-1dw`}
           />
           <p style={styles.noteMoyenne}>
-            Note Moyenne : {dessinNote(restaurant.averageStars)}
+            Note Moyenne :{" "}
+            {!restaurant.averageStars
+              ? "Aucune note actuellement"
+              : dessinNote(restaurant.averageStars)}
           </p>
           <div>
             <p style={styles.avis}>Voici les derniers avis postés :</p>
-            {Object.keys(restaurant).length > 0 &&
+            {restaurant.ratings &&
               restaurant.ratings.map((rating, index) => (
                 <React.Fragment key={index}>
                   <p style={styles.note}>{dessinNote(rating.stars)}</p>

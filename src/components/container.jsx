@@ -4,6 +4,7 @@ import restaurants from "../listeResto.json";
 import DescriptionModal from "./descriptionModal";
 import AvisModal from "./avisModal";
 import AjoutModal from "./ajoutModal";
+import _ from "lodash";
 
 class Container extends Component {
   state = {
@@ -19,7 +20,7 @@ class Container extends Component {
   };
   componentDidMount() {
     const map = new window.google.maps.Map(this.refs.map, {
-      center: { lat: 41.0082, lng: 28.9784 },
+      center: { lat: 43.3, lng: 5.4 },
       zoom: 5
     });
     window.google.maps.event.addListener(map, "bounds_changed", () => {
@@ -100,9 +101,38 @@ class Container extends Component {
   };
   ajoutMarkerClick = map => {
     window.google.maps.event.addListener(map, "click", event => {
-      this.placerMarker(event, map);
-      this.setState({ showAjout: true });
+      const { restaurant } = this.state;
+      restaurant.restaurantName = "";
+      restaurant.address = "";
+      restaurant.ratings = [];
+      restaurant.placeId = 0;
+      restaurant.averageStars = null;
+      //  this.placerMarker(event, map);
+      this.setState({ restaurant, showAjout: true });
     });
+  };
+  handleAjoutListe = (restaurant, avis) => {
+    const { restaurants } = this.state;
+    restaurant.restaurantName = _.capitalize(restaurant.restaurantName);
+    restaurant.address = _.capitalize(restaurant.address);
+    let marker = this.state.markers[this.state.markers.length - 1];
+    restaurant.marker = marker;
+    this.handleHideModals();
+    restaurants.push(restaurant);
+    const showAvis = avis ? true : false;
+    this.setState({ restaurants, restaurant, showAvis });
+  };
+  handleChangeAjout = event => {
+    let restaurant = { ...this.state.restaurant };
+    restaurant[event.target.name] = event.target.value;
+    this.setState({ restaurant });
+  };
+  handleHideAjout = () => {
+    this.handleHideModals();
+    const { markers } = this.state;
+    markers[markers.length - 1].setMap(null);
+    markers.pop();
+    this.setState({ markers });
   };
   averageStars(restaurant) {
     let totalNotes = 0;
@@ -147,24 +177,13 @@ class Container extends Component {
   };
   handleRating = () => {
     const { rating, restaurant, restaurants } = this.state;
-    rating.comment =
-      rating.comment.charAt(0).toUpperCase() + rating.comment.slice(1);
+    rating.comment = _.capitalize(rating.comment);
     const index = restaurants.indexOf(restaurant);
     restaurant.ratings = [rating, ...restaurant.ratings];
     restaurant.averageStars = this.averageStars(restaurant);
     restaurants[index] = restaurant;
     this.handleHideModals();
     this.setState({ rating, restaurants });
-  };
-  handleAjout = restaurant => {
-    const restaurants = [...this.state.restaurants];
-    let marker = this.state.markers[this.state.markers.length - 1];
-    restaurant.lat = marker.getPosition().lat();
-    restaurant.long = marker.getPosition().lng();
-    restaurant.marker = marker;
-    this.handleHideModals();
-    restaurants.push(restaurant);
-    this.setState({ restaurants, restaurant });
   };
   render() {
     const {
@@ -174,8 +193,7 @@ class Container extends Component {
       showDescription,
       showAvis,
       showAjout,
-      rating,
-      markers
+      rating
     } = this.state;
 
     return (
@@ -208,9 +226,10 @@ class Container extends Component {
         />
         <AjoutModal
           show={showAjout}
-          onHide={this.handleHideModals}
-          marker={markers[markers.length - 1]}
-          onAjout={this.handleAjout}
+          onHide={this.handleHideAjout}
+          onAjout={this.handleAjoutListe}
+          onChange={this.handleChangeAjout}
+          restaurant={restaurant}
         />
       </div>
     );
