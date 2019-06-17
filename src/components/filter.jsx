@@ -3,7 +3,7 @@ import { dessinNote } from "./../utils";
 import Select from "./select";
 
 const Filter = ({ min, max, onChange }) => {
-  const options = [1, 2, 3, 4, 5];
+  const options = [0, 1, 2, 3, 4, 5];
   return (
     <div className="container" style={{ marginBottom: 10 }}>
       De

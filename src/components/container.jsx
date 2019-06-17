@@ -3,6 +3,7 @@ import Liste from "./liste";
 import restaurants from "../listeResto.json";
 import DescriptionModal from "./descriptionModal";
 import AvisModal from "./avisModal";
+import AjoutModal from "./ajoutModal";
 
 class Container extends Component {
   state = {
@@ -13,6 +14,7 @@ class Container extends Component {
     bounds: {},
     showDescription: false,
     showAvis: false,
+    showAjout: false,
     rating: { stars: 0, comment: "" }
   };
   componentDidMount() {
@@ -58,6 +60,7 @@ class Container extends Component {
       restaurant.averageStars = this.averageStars(restaurant);
       restaurant.marker = this.state.markers[this.state.markers.length - 1];
     });
+    this.ajoutMarkerClick(map);
     this.setState({ restaurants, map });
   }
   handleLocationError(browserHasGeolocation, infoWindow, pos, map) {
@@ -69,28 +72,20 @@ class Container extends Component {
     );
     infoWindow.open(map);
   }
-  averageStars(restaurant) {
-    let totalNotes = 0;
-    const nombreNotes = restaurant.ratings.length;
-    for (let i = 0; i < nombreNotes; i++) {
-      totalNotes += Number(restaurant.ratings[i].stars);
-    }
-    // On arrondi la moyenne au 0.25 pres
-    const moyStars = Math.round(2 * (totalNotes / nombreNotes)) / 2;
-    return moyStars;
-  }
   placerMarker = (restaurant, map) => {
     let { markers } = this.state;
     const imageResto = "icons/resto.png";
-    const markerResto = new window.google.maps.Marker({
-      position: new window.google.maps.LatLng(restaurant.lat, restaurant.long),
+    const position = restaurant.long
+      ? new window.google.maps.LatLng(restaurant.lat, restaurant.long)
+      : restaurant.latLng;
+    const marker = new window.google.maps.Marker({
+      position,
       map: map,
-      icon: imageResto,
-      title: restaurant.restaurantName
+      icon: imageResto
     });
-    markers.push(markerResto);
-    markerResto.addListener("click", function() {
-      map.setCenter(markerResto.getPosition());
+    markers.push(marker);
+    marker.addListener("click", function() {
+      map.setCenter(marker.getPosition());
       /*
           let indexMarker = markers.length - 1;
       infoResto.avis(resto);
@@ -103,8 +98,28 @@ class Container extends Component {
     });
     this.setState({ markers });
   };
+  ajoutMarkerClick = map => {
+    window.google.maps.event.addListener(map, "click", event => {
+      this.placerMarker(event, map);
+      this.setState({ showAjout: true });
+    });
+  };
+  averageStars(restaurant) {
+    let totalNotes = 0;
+    const nombreNotes = restaurant.ratings.length;
+    for (let i = 0; i < nombreNotes; i++) {
+      totalNotes += Number(restaurant.ratings[i].stars);
+    }
+    // On arrondi la moyenne au 0.25 pres
+    const moyStars = Math.round(2 * (totalNotes / nombreNotes)) / 2;
+    return moyStars;
+  }
   handleHideModals = () => {
-    this.setState({ showDescription: false, showAvis: false });
+    this.setState({
+      showDescription: false,
+      showAvis: false,
+      showAjout: false
+    });
   };
   handleClick = restaurant => {
     this.setState({ showDescription: true, restaurant });
@@ -141,6 +156,16 @@ class Container extends Component {
     this.handleHideModals();
     this.setState({ rating, restaurants });
   };
+  handleAjout = restaurant => {
+    const restaurants = [...this.state.restaurants];
+    let marker = this.state.markers[this.state.markers.length - 1];
+    restaurant.lat = marker.getPosition().lat();
+    restaurant.long = marker.getPosition().lng();
+    restaurant.marker = marker;
+    this.handleHideModals();
+    restaurants.push(restaurant);
+    this.setState({ restaurants, restaurant });
+  };
   render() {
     const {
       restaurants,
@@ -148,8 +173,11 @@ class Container extends Component {
       bounds,
       showDescription,
       showAvis,
-      rating
+      showAjout,
+      rating,
+      markers
     } = this.state;
+
     return (
       <div style={styles.containerStyle}>
         <div style={styles.divMap}>
@@ -177,6 +205,12 @@ class Container extends Component {
           rating={rating}
           onRate={this.handleRating}
           onChange={this.handleChangeComment}
+        />
+        <AjoutModal
+          show={showAjout}
+          onHide={this.handleHideModals}
+          marker={markers[markers.length - 1]}
+          onAjout={this.handleAjout}
         />
       </div>
     );

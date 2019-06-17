@@ -18,7 +18,9 @@ const DescriptionModal = ({ restaurant, show, onHide, onOpenRating }) => {
             alt="streetView"
             src={`https://maps.googleapis.com/maps/api/streetview?size=468x300&location=${
               restaurant.lat
-            },${restaurant.long}&heading=151.78&pitch=-0.76&key=key`}
+            },${
+              restaurant.long
+            }&heading=151.78&pitch=-0.76&key=AIzaSyBf4GOhxsge_3kuAKHKDDiWLVEbl6t-1dw`}
           />
           <p style={styles.noteMoyenne}>
             Note Moyenne : {dessinNote(restaurant.averageStars)}

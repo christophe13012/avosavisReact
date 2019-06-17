@@ -3,7 +3,7 @@ import Restaurant from "./restaurant";
 import Filter from "./filter";
 
 class Liste extends Component {
-  state = { range: { min: 1, max: 5 } };
+  state = { range: { min: 0, max: 5 } };
   filterGeoloc() {
     const { restaurants, bounds } = this.props;
     const latMax = bounds.na.l;
