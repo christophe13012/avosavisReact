@@ -11,22 +11,18 @@ class Container extends Component {
     map: {},
     restaurants: [],
     restaurant: {},
-    markers: [],
     bounds: {},
     showDescription: false,
     showAvis: false,
     showAjout: false,
-    rating: { stars: 0, comment: "" }
+    rating: { stars: 0, comment: "", auteur: "" }
   };
   componentDidMount() {
     const map = new window.google.maps.Map(this.refs.map, {
       center: { lat: 43.3, lng: 5.4 },
-      zoom: 5
+      zoom: 14
     });
-    window.google.maps.event.addListener(map, "bounds_changed", () => {
-      const bounds = map.getBounds();
-      this.setState({ bounds });
-    });
+
     const infoWindow = new window.google.maps.InfoWindow();
     // Try HTML5 geolocation.
     if (navigator.geolocation) {
@@ -54,14 +50,22 @@ class Container extends Component {
       // Browser doesn't support Geolocation
       this.handleLocationError(false, infoWindow, map.getCenter(), map);
     }
+    window.google.maps.event.addListener(map, "bounds_changed", () => {
+      const bounds = map.getBounds();
+      this.placesAPI(map);
+      this.setState({ bounds });
+    });
     // Ajout restaurants initiaux
+
     restaurants.forEach(restaurant => {
       restaurant.placeId = 0;
-      this.placerMarker(restaurant, map);
+      const marker = this.placerMarker(restaurant, map);
+      restaurant.marker = marker;
       restaurant.averageStars = this.averageStars(restaurant);
-      restaurant.marker = this.state.markers[this.state.markers.length - 1];
     });
+
     this.ajoutMarkerClick(map);
+
     this.setState({ restaurants, map });
   }
   handleLocationError(browserHasGeolocation, infoWindow, pos, map) {
@@ -73,8 +77,56 @@ class Container extends Component {
     );
     infoWindow.open(map);
   }
+  placesAPI = map => {
+    const request = {
+      location: map.center,
+      radius: "500",
+      type: ["restaurant"]
+    };
+    const service = new window.google.maps.places.PlacesService(map);
+    service.nearbySearch(request, (results, status) => {
+      if (status === "OK") {
+        const restaurants = [...this.state.restaurants];
+        results.forEach(result => {
+          const restaurant = {
+            restaurantName: result.name,
+            address: result.vicinity,
+            lat: result.geometry.location.lat(),
+            long: result.geometry.location.lng(),
+            ratings: []
+          };
+
+          service.getDetails({ placeId: result.place_id }, (place, status) => {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+              const reviews = place.reviews;
+              place.reviews &&
+                reviews.forEach(review => {
+                  restaurant.ratings.push({
+                    stars: review.rating,
+                    comment: review.text,
+                    auteur: review.author_name
+                  });
+                });
+              restaurant.averageStars = this.averageStars(restaurant);
+            }
+            if (
+              restaurants.findIndex(
+                resto =>
+                  resto.restaurantName === restaurant.restaurantName &&
+                  resto.address === restaurant.address
+              ) === -1
+            ) {
+              const marker = this.placerMarker(restaurant, map);
+              restaurant.marker = marker;
+              restaurants.push(restaurant);
+              this.setState({ restaurants });
+            }
+          });
+        });
+      }
+    });
+  };
   placerMarker = (restaurant, map) => {
-    let { markers } = this.state;
     const imageResto = "icons/resto.png";
     const position = restaurant.long
       ? new window.google.maps.LatLng(restaurant.lat, restaurant.long)
@@ -84,7 +136,6 @@ class Container extends Component {
       map: map,
       icon: imageResto
     });
-    markers.push(marker);
     marker.addListener("click", function() {
       map.setCenter(marker.getPosition());
       /*
@@ -97,46 +148,46 @@ class Container extends Component {
       }, 1000);
       */
     });
-    this.setState({ markers });
+    return marker;
   };
   ajoutMarkerClick = map => {
     window.google.maps.event.addListener(map, "click", event => {
-      const { restaurant } = this.state;
+      const restaurant = { ...this.state.restaurant };
       restaurant.restaurantName = "";
       restaurant.address = "";
       restaurant.ratings = [];
       restaurant.placeId = 0;
       restaurant.averageStars = null;
-      //  this.placerMarker(event, map);
+      const marker = this.placerMarker(event, map);
+      restaurant.marker = marker;
       this.setState({ restaurant, showAjout: true });
     });
   };
   handleAjoutListe = (restaurant, avis) => {
-    const { restaurants } = this.state;
+    const restaurants = [...this.state.restaurants];
     restaurant.restaurantName = _.capitalize(restaurant.restaurantName);
     restaurant.address = _.capitalize(restaurant.address);
-    let marker = this.state.markers[this.state.markers.length - 1];
-    restaurant.marker = marker;
+    // let marker = this.state.markers[this.state.markers.length - 1];
+    //  restaurant.marker = marker;
     this.handleHideModals();
     restaurants.push(restaurant);
     const showAvis = avis ? true : false;
     this.setState({ restaurants, restaurant, showAvis });
   };
   handleChangeAjout = event => {
-    let restaurant = { ...this.state.restaurant };
+    const restaurant = { ...this.state.restaurant };
     restaurant[event.target.name] = event.target.value;
     this.setState({ restaurant });
   };
   handleHideAjout = () => {
     this.handleHideModals();
-    const { markers } = this.state;
-    markers[markers.length - 1].setMap(null);
-    markers.pop();
-    this.setState({ markers });
+    const restaurant = { ...this.state.restaurant };
+    restaurant.marker.setMap(null);
   };
   averageStars(restaurant) {
     let totalNotes = 0;
     const nombreNotes = restaurant.ratings.length;
+    if (nombreNotes === 0) return null;
     for (let i = 0; i < nombreNotes; i++) {
       totalNotes += Number(restaurant.ratings[i].stars);
     }
@@ -157,7 +208,7 @@ class Container extends Component {
     this.state.map.setZoom(16);
   };
   handleOpenRating = restaurant => {
-    const rating = { stars: 0, comment: "" };
+    const rating = { stars: 0, comment: "", auteur: "" };
     this.setState({
       showAvis: true,
       restaurant,
@@ -166,24 +217,33 @@ class Container extends Component {
     });
   };
   handleStarClick = noteSaisie => {
-    const { rating } = this.state;
+    const rating = { ...this.state.rating };
     rating.stars = noteSaisie === rating.stars ? rating.stars - 1 : noteSaisie;
     this.setState({ rating });
   };
   handleChangeComment = e => {
-    const { rating } = this.state;
-    rating.comment = e.target.value;
+    const rating = { ...this.state.rating };
+    rating[e.target.name] = e.target.value;
     this.setState({ rating });
   };
   handleRating = () => {
-    const { rating, restaurant, restaurants } = this.state;
+    const rating = { ...this.state.rating };
+    const restaurants = [...this.state.restaurants];
+    const restaurant = { ...this.state.restaurant };
+    const index = restaurants.findIndex(
+      resto =>
+        resto.restaurantName === restaurant.restaurantName &&
+        resto.address === restaurant.address
+    );
     rating.comment = _.capitalize(rating.comment);
-    const index = restaurants.indexOf(restaurant);
+    rating.auteur = _.capitalize(rating.auteur);
     restaurant.ratings = [rating, ...restaurant.ratings];
     restaurant.averageStars = this.averageStars(restaurant);
     restaurants[index] = restaurant;
+    console.log(restaurants);
+
     this.handleHideModals();
-    this.setState({ rating, restaurants });
+    this.setState({ rating, restaurants, restaurant });
   };
   render() {
     const {

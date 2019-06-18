@@ -10,8 +10,7 @@ const AvisModal = ({
   onStarClick,
   rating,
   onRate,
-  onChange,
-  comment
+  onChange
 }) => {
   return (
     <Modal show={show} onHide={onHide}>
@@ -32,11 +31,20 @@ const AvisModal = ({
           <label>Entrez votre avis et votre note :</label>
           <textarea
             onChange={onChange}
-            value={comment}
+            name="comment"
+            value={rating.comment}
             className="form-control"
             rows="3"
           />
           <NoteStars onStarClick={onStarClick} stars={rating.stars} />
+          <label htmlFor="auteur">Entrez votre nom :</label>
+          <input
+            onChange={onChange}
+            name="auteur"
+            value={rating.auteur}
+            className="form-control"
+            id="auteur"
+          />
         </div>
       </Modal.Body>
       <Modal.Footer>

@@ -34,6 +34,7 @@ const DescriptionModal = ({ restaurant, show, onHide, onOpenRating }) => {
                 <React.Fragment key={index}>
                   <p style={styles.note}>{dessinNote(rating.stars)}</p>
                   <p style={styles.comment}>{rating.comment}</p>
+                  <p>Auteur : {rating.auteur}</p>
                   {index !== restaurant.ratings.length - 1 && (
                     <hr style={styles.hr} />
                   )}

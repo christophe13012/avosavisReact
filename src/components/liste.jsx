@@ -27,8 +27,6 @@ class Liste extends Component {
     this.setState({ range });
   };
   render() {
-    console.log(this.props.restaurants);
-
     const geolocRestaurants =
       Object.keys(this.props.bounds).length > 0
         ? this.filterGeoloc()
@@ -38,6 +36,15 @@ class Liste extends Component {
         restaurant.averageStars >= this.state.range.min &&
         restaurant.averageStars <= this.state.range.max
     );
+    const others = geolocRestaurants.filter(
+      restaurant =>
+        restaurant.averageStars < this.state.range.min ||
+        restaurant.averageStars > this.state.range.max
+    );
+    filteredRestaurants.forEach(restaurant =>
+      restaurant.marker.setVisible(true)
+    );
+    others.forEach(restaurant => restaurant.marker.setVisible(false));
     return (
       <div style={styles.div}>
         <h5 style={styles.h5}>Liste de restaurant</h5>
