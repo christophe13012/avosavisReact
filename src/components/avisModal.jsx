@@ -12,6 +12,7 @@ const AvisModal = ({
   onRate,
   onChange
 }) => {
+  const disabled = rating.auteur !== "" && rating.comment !== "" ? false : true;
   return (
     <Modal show={show} onHide={onHide}>
       <Modal.Header closeButton>
@@ -48,11 +49,7 @@ const AvisModal = ({
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          variant="success"
-          disabled={rating.comment.length === 0 ? true : false}
-          onClick={onRate}
-        >
+        <Button variant="success" disabled={disabled} onClick={onRate}>
           Valider l'avis
         </Button>
         <Button variant="danger" onClick={onHide}>

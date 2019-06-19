@@ -6,7 +6,6 @@ class Liste extends Component {
   state = { range: { min: 0, max: 5 } };
   filterGeoloc() {
     const { restaurants, bounds } = this.props;
-
     const latMax = bounds.na.l;
     const latMin = bounds.na.j;
     const longMax = bounds.ga.l;
@@ -45,6 +44,12 @@ class Liste extends Component {
       restaurant.marker.setVisible(true)
     );
     others.forEach(restaurant => restaurant.marker.setVisible(false));
+    const index = filteredRestaurants.findIndex(
+      restaurant => restaurant.marker === this.props.restaurantClicked.marker
+    );
+    console.log(filteredRestaurants);
+
+    if (this.refs.restos && index === -1) this.refs.restos.scrollTop = 0;
     return (
       <div style={styles.div}>
         <h5 style={styles.h5}>Liste de restaurant</h5>
@@ -55,11 +60,12 @@ class Liste extends Component {
           max={this.state.range.max}
         />
         <hr style={styles.hr} />
-        <div style={styles.restaurants}>
+        <div ref="restos" style={styles.restaurants}>
           {filteredRestaurants.map((restaurant, index) => (
             <Restaurant
               key={index}
               restaurant={restaurant}
+              restaurantClicked={this.props.restaurantClicked}
               onClick={this.props.onClick}
               onOpenRating={this.props.onOpenRating}
             />

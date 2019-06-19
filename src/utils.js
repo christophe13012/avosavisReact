@@ -24,3 +24,10 @@ export function dessinNote(note) {
   }
   return stars;
 }
+
+export function bounce(ancientMarker, marker) {
+  // supprime le bounce au dernier
+  if (ancientMarker) ancientMarker.setAnimation(null);
+  // ajout bounce
+  marker.setAnimation(window.google.maps.Animation.BOUNCE);
+}

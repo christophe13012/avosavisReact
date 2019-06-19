@@ -4,11 +4,11 @@ import restaurants from "../listeResto.json";
 import DescriptionModal from "./descriptionModal";
 import AvisModal from "./avisModal";
 import AjoutModal from "./ajoutModal";
+import { bounce } from "./../utils";
 import _ from "lodash";
 
 class Container extends Component {
   state = {
-    map: {},
     restaurants: [],
     restaurant: {},
     bounds: {},
@@ -20,15 +20,30 @@ class Container extends Component {
   componentDidMount() {
     const map = new window.google.maps.Map(this.refs.map, {
       center: { lat: 43.3, lng: 5.4 },
-      zoom: 14
+      zoom: 16
     });
-
+    this.geolocalisation(map);
+    // ajout listenner mouvements carte
+    window.google.maps.event.addListener(map, "bounds_changed", () => {
+      const bounds = map.getBounds();
+      this.placesAPI(map);
+      this.setState({ bounds });
+    });
+    // Ajout restaurants liste JSON
+    restaurants.forEach(restaurant => {
+      const marker = this.placerMarker(restaurant, map);
+      restaurant.marker = marker;
+      restaurant.averageStars = this.averageStars(restaurant);
+    });
+    this.ajoutMarkerClick(map);
+    this.setState({ restaurants, map });
+  }
+  geolocalisation(map) {
     const infoWindow = new window.google.maps.InfoWindow();
     // Try HTML5 geolocation.
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        function(position) {
-          // on place une image personnelle comme icone
+        position => {
           var image = "icons/placeholder.png";
           var marker = new window.google.maps.Marker({
             position: new window.google.maps.LatLng(
@@ -42,7 +57,7 @@ class Container extends Component {
           infoWindow.open(map);
           map.setCenter(marker.getPosition());
         },
-        function() {
+        () => {
           this.handleLocationError(true, infoWindow, map.getCenter(), map);
         }
       );
@@ -50,30 +65,13 @@ class Container extends Component {
       // Browser doesn't support Geolocation
       this.handleLocationError(false, infoWindow, map.getCenter(), map);
     }
-    window.google.maps.event.addListener(map, "bounds_changed", () => {
-      const bounds = map.getBounds();
-      this.placesAPI(map);
-      this.setState({ bounds });
-    });
-    // Ajout restaurants initiaux
-
-    restaurants.forEach(restaurant => {
-      restaurant.placeId = 0;
-      const marker = this.placerMarker(restaurant, map);
-      restaurant.marker = marker;
-      restaurant.averageStars = this.averageStars(restaurant);
-    });
-
-    this.ajoutMarkerClick(map);
-
-    this.setState({ restaurants, map });
   }
   handleLocationError(browserHasGeolocation, infoWindow, pos, map) {
     infoWindow.setPosition(pos);
     infoWindow.setContent(
       browserHasGeolocation
-        ? "Error: The Geolocation service failed."
-        : "Error: Your browser doesn't support geolocation."
+        ? "Erreur: Le srvice de géolocalisation n'a pas fonctionné"
+        : "Erreur: Votre navigateur ne supporte pas la géolocalisation"
     );
     infoWindow.open(map);
   }
@@ -95,7 +93,6 @@ class Container extends Component {
             long: result.geometry.location.lng(),
             ratings: []
           };
-
           service.getDetails({ placeId: result.place_id }, (place, status) => {
             if (status === window.google.maps.places.PlacesServiceStatus.OK) {
               const reviews = place.reviews;
@@ -107,7 +104,6 @@ class Container extends Component {
                     auteur: review.author_name
                   });
                 });
-              restaurant.averageStars = this.averageStars(restaurant);
             }
             if (
               restaurants.findIndex(
@@ -116,8 +112,8 @@ class Container extends Component {
                   resto.address === restaurant.address
               ) === -1
             ) {
-              const marker = this.placerMarker(restaurant, map);
-              restaurant.marker = marker;
+              restaurant.marker = this.placerMarker(restaurant, map);
+              restaurant.averageStars = this.averageStars(restaurant);
               restaurants.push(restaurant);
               this.setState({ restaurants });
             }
@@ -136,17 +132,11 @@ class Container extends Component {
       map: map,
       icon: imageResto
     });
-    marker.addListener("click", function() {
-      map.setCenter(marker.getPosition());
-      /*
-          let indexMarker = markers.length - 1;
-      infoResto.avis(resto);
-      outils.bounce(markerResto);
-      outils.clignoterResto(indexMarker);
-      setTimeout(function() {
-        outils.scrollTo(indexMarker);
-      }, 1000);
-      */
+    marker.addListener("click", () => {
+      const restaurant = { ...this.state.restaurant };
+      bounce(restaurant.marker, marker);
+      restaurant.marker = marker;
+      this.setState({ restaurant });
     });
     return marker;
   };
@@ -203,9 +193,9 @@ class Container extends Component {
     });
   };
   handleClick = restaurant => {
+    const { restaurant: resto } = this.state;
+    bounce(resto.marker, restaurant.marker);
     this.setState({ showDescription: true, restaurant });
-    this.state.map.setCenter(restaurant.marker.getPosition());
-    this.state.map.setZoom(16);
   };
   handleOpenRating = restaurant => {
     const rating = { stars: 0, comment: "", auteur: "" };
@@ -247,7 +237,6 @@ class Container extends Component {
   };
   render() {
     const {
-      restaurants,
       restaurant,
       bounds,
       showDescription,
@@ -255,7 +244,11 @@ class Container extends Component {
       showAjout,
       rating
     } = this.state;
-
+    const restaurants = _.orderBy(
+      this.state.restaurants,
+      ["restaurantName"],
+      ["asc"]
+    );
     return (
       <div style={styles.containerStyle}>
         <div style={styles.divMap}>
@@ -265,6 +258,7 @@ class Container extends Component {
         </div>
         <Liste
           restaurants={restaurants}
+          restaurantClicked={restaurant}
           bounds={bounds}
           onClick={this.handleClick}
           onOpenRating={this.handleOpenRating}

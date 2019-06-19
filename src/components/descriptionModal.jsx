@@ -28,7 +28,11 @@ const DescriptionModal = ({ restaurant, show, onHide, onOpenRating }) => {
               : dessinNote(restaurant.averageStars)}
           </p>
           <div>
-            <p style={styles.avis}>Voici les derniers avis postés :</p>
+            <p style={styles.avis}>
+              {restaurant.ratings && restaurant.ratings.length > 0
+                ? "Voici les derniers avis postés : "
+                : "Aucun avis posté"}
+            </p>
             {restaurant.ratings &&
               restaurant.ratings.map((rating, index) => (
                 <React.Fragment key={index}>
