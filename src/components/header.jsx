@@ -7,11 +7,7 @@ const Header = () => {
       className="display-3 center"
     >
       Avosavis
-      <img
-        style={{ marginLeft: 7 }}
-        alt="iconChef"
-        src="http://localhost:3000/icons/chef.png"
-      />
+      <img style={{ marginLeft: 7 }} alt="iconChef" src="icons/chef.png" />
     </h1>
   );
 };
