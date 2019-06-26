@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/avosavisReact/static/css/main.2cce8147.chunk.css",
+    "main.js": "/avosavisReact/static/js/main.2a6d1021.chunk.js",
+    "main.js.map": "/avosavisReact/static/js/main.2a6d1021.chunk.js.map",
+    "runtime~main.js": "/avosavisReact/static/js/runtime~main.99a3f58a.js",
+    "runtime~main.js.map": "/avosavisReact/static/js/runtime~main.99a3f58a.js.map",
+    "static/css/2.22a7d4ef.chunk.css": "/avosavisReact/static/css/2.22a7d4ef.chunk.css",
+    "static/js/2.2d99e22d.chunk.js": "/avosavisReact/static/js/2.2d99e22d.chunk.js",
+    "static/js/2.2d99e22d.chunk.js.map": "/avosavisReact/static/js/2.2d99e22d.chunk.js.map",
+    "index.html": "/avosavisReact/index.html",
+    "precache-manifest.4e8a550526649f2045887d1696e65fd5.js": "/avosavisReact/precache-manifest.4e8a550526649f2045887d1696e65fd5.js",
+    "service-worker.js": "/avosavisReact/service-worker.js",
+    "static/css/2.22a7d4ef.chunk.css.map": "/avosavisReact/static/css/2.22a7d4ef.chunk.css.map",
+    "static/css/main.2cce8147.chunk.css.map": "/avosavisReact/static/css/main.2cce8147.chunk.css.map"
+  }
+}
