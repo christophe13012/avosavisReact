@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/avosavisReact/precache-manifest.4e8a550526649f2045887d1696e65fd5.js"
+  "/avosavisReact/precache-manifest.45c8caf3ed412a9efb41add925761283.js"
 );
 
 self.addEventListener('message', (event) => {
