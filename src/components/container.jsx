@@ -230,8 +230,6 @@ class Container extends Component {
     restaurant.ratings = [rating, ...restaurant.ratings];
     restaurant.averageStars = this.averageStars(restaurant);
     restaurants[index] = restaurant;
-    console.log(restaurants);
-
     this.handleHideModals();
     this.setState({ rating, restaurants, restaurant });
   };

@@ -6,10 +6,11 @@ class Liste extends Component {
   state = { range: { min: 0, max: 5 } };
   filterGeoloc() {
     const { restaurants, bounds } = this.props;
-    const latMax = bounds.na.l;
-    const latMin = bounds.na.j;
-    const longMax = bounds.ga.l;
-    const longMin = bounds.ga.j;
+
+    const latMax = bounds.ha.h;
+    const latMin = bounds.ha.g;
+    const longMax = bounds.da.h;
+    const longMin = bounds.da.g;
     const geolocRestaurants = restaurants.filter(
       restaurant =>
         restaurant.marker.getPosition().lng() < longMax &&
@@ -47,8 +48,6 @@ class Liste extends Component {
     const index = filteredRestaurants.findIndex(
       restaurant => restaurant.marker === this.props.restaurantClicked.marker
     );
-    console.log(filteredRestaurants);
-
     if (this.refs.restos && index === -1) this.refs.restos.scrollTop = 0;
     return (
       <div style={styles.div}>
