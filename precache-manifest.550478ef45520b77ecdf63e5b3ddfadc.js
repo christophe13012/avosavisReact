@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "ffa3643c2eeb2e4b5a74fd3211f1b13c",
+    "revision": "d432ae390817d0c69958b181294ce830",
     "url": "/avosavisReact/index.html"
   },
   {
-    "revision": "dc68a9c4b4b3915db854",
+    "revision": "d8bf43a05c3e87bb01e6",
     "url": "/avosavisReact/static/css/2.22a7d4ef.chunk.css"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/avosavisReact/static/css/main.2cce8147.chunk.css"
   },
   {
-    "revision": "dc68a9c4b4b3915db854",
-    "url": "/avosavisReact/static/js/2.2d99e22d.chunk.js"
+    "revision": "d8bf43a05c3e87bb01e6",
+    "url": "/avosavisReact/static/js/2.a307946b.chunk.js"
   },
   {
     "revision": "afd5dbb10b3028e1a22c",
